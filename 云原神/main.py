@@ -12,16 +12,16 @@ token = os.environ.get("YUAN_SHEN_TOKEN")
 def get_access_token():
     global appID, appSecret
     # 获取access token的url
-    print("正在获取 access_token...")
     url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}' \
         .format(appID.strip(), appSecret.strip())
+    print(f"请求 URL: {url}")  # Log the request URL
     response = requests.get(url).json()
-    print("获取到的 access_token 响应：", response)
+    print(f"获取 access_token 响应: {response}")  # Log the response
     access_token = response.get('access_token')
     if access_token:
-        print("成功获取到 access_token")
+        print("成功获取 access_token")
     else:
-        print("未能获取到 access_token")
+        print("获取 access_token 失败")
     return access_token
 
 
@@ -41,10 +41,11 @@ def send(access_token, ltime, status):
             }
         }
     }
-    url = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}'.format(access_token)
-    print("正在发送模板消息...")
-    response = requests.post(url, json.dumps(body))
-    print("发送响应：", response.text)
+    url = f'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={access_token}'
+    print(f"发送模板消息的 URL: {url}")  # Log the request URL
+    print(f"请求体: {body}")  # Log the request body
+    response = requests.post(url, json.dumps(body)).text
+    print(f"发送响应: {response}")  # Log the response
 
 
 # 账号信息
@@ -71,21 +72,27 @@ headers = {
 }
 
 print("正在获取游戏数据...")
+
 response = requests.get(url, headers=headers)
 response.encoding = "utf-8"
 data = json.loads(response.text)
-print("获取到的游戏数据：", data)
 
 if data["retcode"] != 0:
     c = "签到失败"
     t = "获取失败"
-    print("签到失败")
 else:
     coin = data["data"]["coin"]["coin_num"]
     time = data["data"]["free_time"]["free_time"]
     c = f"签到成功"
     t = time + "分钟"
-    print(f"签到成功，获取到的时间: {time}分钟")
 
+print(f"获取到的游戏数据： {data}")
+print(f"签到状态：{c}")
+print(f"获取到的时间: {t}")
+
+# 获取 access_token 并发送模板消息
+print("正在获取 access_token...")
 access_token = get_access_token()
+
+print("正在发送模板消息...")
 send(access_token, t, c)
